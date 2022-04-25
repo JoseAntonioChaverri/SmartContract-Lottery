@@ -37,7 +37,6 @@ contract Lottery is VRFConsumerBase, Ownable {
     }
 
     function enter() public payable {
-        // $50 mininum
         require(lottery_state == LOTTERY_STATE.OPEN);
         require(
             msg.value >= getEntranceFee(),
@@ -48,8 +47,7 @@ contract Lottery is VRFConsumerBase, Ownable {
 
     function getEntranceFee() public view returns (uint256) {
         (, int256 price, , , ) = ethUsdPriceFeed.latestRoundData();
-        uint256 adjustedPrice = uint256(price) * 10**10; // have 18 decimals
-        // $50, $2000/ETH => 50/2000 => 50*100000 / 2000
+        uint256 adjustedPrice = uint256(price) * 10**10;
         uint256 costToEnter = (usdEntryFee * 10**18) / adjustedPrice;
         return costToEnter;
     }
@@ -64,6 +62,9 @@ contract Lottery is VRFConsumerBase, Ownable {
 
     function endLottery() public onlyOwner {
         // The next function is unaceptable random function
+        // never use this because is vulnerable, better user
+        // requestRandomness example
+
         //    uint256(
         //        keccack256(
         //            abi.encodePacked(
@@ -74,6 +75,7 @@ contract Lottery is VRFConsumerBase, Ownable {
         //            )
         //        )
         //    ) % players.length;
+
         lottery_state = LOTTERY_STATE.CALCULATING_WINNER;
         bytes32 requestId = requestRandomness(keyhash, fee);
         emit RequestedRandomness(requestId);
